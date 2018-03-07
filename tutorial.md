@@ -1,119 +1,114 @@
-## JS Tooling Lab
+## JS Tutorial
 
-- npm init -y
-- npm install --save-dev webpack webpack-cli html-webpack-plugin webpack-dev-server
-- touch webpack.config.js
-- paste:
+First, make sure you're up to speed on arrow function syntax:
+
+These two function definitions are identical.
 ```
-  const path = require('path')
-  const webpack = require('webpack')
-  const HtmlWebpackPlugin = require('html-webpack-plugin')
+function logger(arg) {
+  console.log(arg);
+}
 
-  module.exports = {
-    entry: './src/js/app.js',
-    output: {
-      path: __dirname + '/dist',
-      filename: 'bundle.js'
-    },
-    plugins: [
-      new HtmlWebpackPlugin({
-        title: 'My App',
-        template: 'index.html'
-      })
-    ]
-  }
-```
-
-- add to "scripts" section in package.json:
-```
-  "scripts": {
-    ...
-    "start": "webpack-dev-server --inline --content-base ./dist --env development",
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development"
-  }
-```
-
-- touch src/js/app.js
-- add something basic:
-```
-  console.log('loaded!')
-```
-
-- touch index.html (index.html should be located at the root of your project)
-- paste:
-```
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <div class="container">
-      Hello World!
-    </div>
-  </body>
-</html>
-```
-
-- npm run build
-- open dist/index.html
-
-Wootz! Your app is loaded.  Check the chrome console to see that your javascript executed.  Check out the "./dist" folder to see what was generated. Just upload the dist folder to a hosting site like S3 and you're good to go.
-
-We've built the site for production.  For development, we want a dev server that automatically reloads when we make changes.  Try this:
-
-- npm start
-- open localhost:8080
-
-Looks the same right?  Now try changing something in your js or html file.  Watch the site auto recompile & reload.  neat right!
-
-- npm i --save-dev css-loader style-loader url-loader babel-core babel-loader babel-preset-es2015
-
-- edit webpack.config.js.  add a new object to the structure exported from the file
-```
-  module.exports = {
-    ... ,
-    module: {
-      rules: [
-        {
-          test: /\.css$/,
-          include: path.resolve(__dirname, "src"),
-          use: [
-            'style-loader',
-            'css-loader'
-          ]
-        },
-        {
-          test: /\.js$/,
-          include: path.resolve(__dirname, "src"),
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              presets: [
-                ['es2015', { modules: false }]
-              ]
-            }
-          }]
-        },
-      ]
-    }
-  }
-```
-
-- touch src/css/main.css
-- add some css directives:
-```
-.container {
-  text-align: center;
+let logger = (arg) => {
+  console.log(arg);
 }
 ```
 
-- edit app.js. add to top:
+A one line arrow function doesn't need a return call, whereas using brackets does.
+
 ```
-  require('../css/main.css');
+let generateMessage = (name) => "Hi, "+name;
+
+let generateMessage = (name) => {
+  "Hi, "+name;
+}
 ```
 
-- watch the page reload
-- hey your css is there!
+Not hard.  Just some housekeeping for later.
+
+Great, we are going to be using The Guardian's public API to search through news articles.  (The Guardian is an Engligh language online news source based in the UK).  Get an API Key here: https://bonobo.capi.gutools.co.uk/register/developer
+
+test out the search API from terminal.  You should get  back a bunch of JSON.
+- curl "https://content.guardianapis.com/search?api-key=<PASTE_YOUR_API_KEY_HERE>"
+
+now try it with a search term
+- curl "https://content.guardianapis.com/search?api-key=<YOUR_API_KEY>&q=olympics"
+
+Great, now lets pause and talk about callbacks.  Rewrite app.js:
+```
+setTimeout(() => { console.log('hi') }, 3000)
+```
+
+What's going on here exactly?  <PAUSE FOR DISCUSSION>
+
+Without going too deeply into why, lets agree to agree that this pattern can quickly lead to "callback hell" with multiple nested levels of functions calling functions calling functions.
+
+To remedy this, Promises & async functions were created.  First, promises.  Lets use a Promise to create a sleep function that wraps setTimeout.
+
+```
+function sleep(millis) {
+  return new Promise(
+    (resolve) => {
+      setTimeout(resolve, millis)
+    }
+  );
+}
+```
+
+Now call our function with special promise syntax
+
+```
+function sleep(millis) {
+  return new Promise(
+    (resolve) => {
+      setTimeout(resolve, millis)
+    }
+  );
+}
+
+function main() {
+  console.log('wait for it...');
+  sleep(5000).then(() => {
+    console.log('sup')
+  });
+}
+
+main();
+```
+
+If this doesn't seem very much better to you, lets refactor to use an async function:
+
+```
+// prepending async automatically wraps your return value in a promise.
+async function sleep(millis) {
+  return setTimeout(resolve, millis);
+}
+
+async function main() {
+  console.log('wait for it...');
+  await sleep(5000);
+  console.log('sup');
+}
+
+main();
+```
+
+This lets you write your code declaratively without creating a highly nested web of spaghetti.  Only thing to remember is async functions can only be called from async functions.  
+
+
+Ok, back to the guardian lets use fetch to request some articles:
+```
+function main() {
+  const apikey = '<PASTE HERE>';
+  const query = 'north+korea';
+  const result =
+    fetch(`https://content.guardianapis.com/search?api-key=${apikey}&q=${query}`)
+    .then( (result) => result.json())
+    .then( (data) => data);
+
+   console.log(result)
+}
+
+main();
+```
+
+Now, a lab.  Create a one-page app that lets a user enter a some text and see links to Guardian articles that match the search term.
