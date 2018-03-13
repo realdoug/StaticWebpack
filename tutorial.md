@@ -35,7 +35,7 @@ now try it with a search term
 
 Great, now lets pause and talk about callbacks.  Rewrite app.js:
 ```
-setTimeout(() => { console.log('hi') }, 3000)
+setTimeout(() => { console.log('hi') }, 3000);
 ```
 
 What's going on here exactly?  <PAUSE FOR DISCUSSION>
