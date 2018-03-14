@@ -1,3 +1,15 @@
-.container {
-  text-align: center;
+.mainrow {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  flex: 1,1, 100px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  width: auto;
+  /* flex: 0,0, auto; */
 }
