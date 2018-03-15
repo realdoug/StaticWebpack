@@ -19,7 +19,6 @@ export class StatefulReact extends Component {
     };
   }
 
-
   render() {
     console.log('rendering!');
     return (
