@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-export const message = "Hello from another file";
-export const setElementValue = (id, value) => {
-  document.getElementById(id).innerText = value;
-}
 
 export const SimpleReact = () => {
   return <div>Hello from JSX</div>;
+}
+
+async function callAPI(term, page = 1) {
+  const apikey = '95c34ace-63f5-4d4a-9015-13cecb65f12d';
+
+  let fetchResult = await fetch(`https://content.guardianapis.com/search?api-key=${apikey}&q=${term}&currentPage=${page}`)
+  return await fetchResult.json();
 }
 
 export class StatefulReact extends Component {
